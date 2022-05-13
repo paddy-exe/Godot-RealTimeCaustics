@@ -1,0 +1,12 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=2]
+
+[ext_resource path="res://Assets/Shaders/Caustics_Shader.tres" type="Shader" id=1]
+[ext_resource path="res://Assets/Caustics/caustics-generator2.png" type="Texture" id=2]
+
+[resource]
+shader = ExtResource( 1 )
+shader_param/main_light_direction = Transform( 0.890554, -0.327443, 0.315744, -0.14325, 0.456928, 0.877893, -0.431732, -0.827042, 0.360013, 0, 7.85742, 0 )
+shader_param/caustics_speed = 0.848
+shader_param/caustics_scale = 4.044
+shader_param/alpha_cutoff = 0.386
+shader_param/caustics_tex = ExtResource( 2 )

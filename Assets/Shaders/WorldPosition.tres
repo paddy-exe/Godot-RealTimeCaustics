@@ -1,0 +1,36 @@
+[gd_resource type="Shader" format=2]
+
+[resource]
+code = "shader_type spatial;
+
+varying vec4 positionCS;
+
+vec3 reconstructWorldPosition(sampler2D depth_tex, vec2 screen_uv, mat4 inv_proj_matrix) {
+	float depth = texture(depth_tex, screen_uv).r;
+	
+	vec4 upos = inv_proj_matrix * vec4(screen_uv * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
+    vec3 pixel_position = upos.xyz / upos.w;
+	
+	return pixel_position.xyz;
+}
+
+vec4 object_to_clip_pos(vec3 pos, mat4 model_view_matrix, mat4 projection_matrix) {
+	mat4 MVP = model_view_matrix * projection_matrix;
+	return MVP * vec4(pos, 1.0);
+}
+
+void vertex () {
+	positionCS = object_to_clip_pos(POSITION.xyz, MODELVIEW_MATRIX, PROJECTION_MATRIX);
+}
+
+void fragment () {
+	
+	vec2 positionNDC = positionCS.xy / VIEWPORT_SIZE.xy;
+	
+	vec3 positionWS = reconstructWorldPosition(DEPTH_TEXTURE, SCREEN_UV, INV_PROJECTION_MATRIX);
+	
+	vec4 color = vec4(fract(positionWS), 1.0);
+	
+	ALBEDO = color.rgb;
+	
+}"

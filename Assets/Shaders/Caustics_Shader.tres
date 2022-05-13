@@ -1,0 +1,79 @@
+[gd_resource type="Shader" format=2]
+
+[resource]
+code = "shader_type spatial;
+render_mode cull_front, depth_draw_always, depth_test_disable;
+
+
+uniform mat4 main_light_direction;
+uniform sampler2D caustics_tex : hint_black_albedo;
+uniform float caustics_speed = 0.5;
+uniform float caustics_scale = 0.5;
+uniform float alpha_cutoff = 1.0;
+
+
+bool custom_all(vec3 input) {
+	if (input.xyz != vec3(0.0)) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+float custom_all_glsl(vec3 input) {
+	return all(equal(input, vec3(0.0))) ? 1.0 : 0.0;
+}
+
+vec2 Panner(vec2 uv, float speed, float tiling) {
+	return (vec2(1.0, 0.0) * (TIME/10.0) * speed) + (uv * tiling);
+}
+
+
+void fragment() {
+	// same as SCREEN_UV
+	vec2 positionNDC = FRAGCOORD.xy / VIEWPORT_SIZE.xy;
+	
+	//float depth = texture(DEPTH_TEXTURE, positionNDC).r;
+	//vec4 upos = INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
+	
+	
+	//ALBEDO = 1.0 - vec3(depth);
+	
+	float depth = texture(DEPTH_TEXTURE, SCREEN_UV).r;
+	vec4 upos = CAMERA_MATRIX * INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
+	vec3 positionWS = upos.xyz / upos.w;
+	
+	
+	vec4 color = vec4(fract(positionWS), 1.0);
+	
+	ALBEDO = color.rgb;
+	
+	//vec3 positionOS = (inverse(WORLD_MATRIX) * vec4(positionWS, 1.0)).xyz;
+	
+	//float boundingBoxMask = float(int(custom_all_glsl( step(positionOS, vec3(0.5)) * (1.0 - step(positionOS, vec3(-0.5)) ) )));
+	
+	
+	// TODO: doesn't work yet
+	float boundingBoxMask = custom_all_glsl( step(positionWS, vec3(0.5)) * (1.0 - step(positionWS, vec3(-0.5)) ) );
+	
+	ALBEDO = vec3(boundingBoxMask);
+	
+	vec2 uv = ( transpose(main_light_direction) * vec4(positionWS, 0.0) ).xy;
+	
+	
+	vec2 moving_uv = Panner(uv, caustics_speed, 1.0 / caustics_scale);
+	
+	vec4 caustics = texture(caustics_tex, moving_uv);
+	
+	// greyscale caustics texture -> only important for colored caustics textures
+	float avg_caustics = (caustics.r + caustics.g + caustics.b) / 3.0;
+	caustics.rgb = vec3(avg_caustics);
+	
+	
+	ALBEDO = caustics.rgb;
+	//EMISSION = caustics.rgb;
+	
+	ALPHA = (caustics.r + caustics.g + caustics.b) / 3.0 * alpha_cutoff;
+	
+	
+}"
