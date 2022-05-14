@@ -8,16 +8,15 @@ The **original** shader code was written by Alex Ameye ([@alexanderameye](https:
 
 ## Done / To-Do
 * [X] Reconstructing world position from depth
-* [ ] Bounding Box Mask (caustics only visible inside the box)
+* [X] Bounding Box Mask (caustics only visible inside the box)
 * [X] Caustics Mapping over World UV
     * [X] changes with light direction
-    * [ ] rework the code to set the lighting matrix in the shader uniform from the Direction Light in the scene
 * [X] Scaling and movement/panning
-* [ ] Multiple overlaped caustics textures
-* [ ] Chromatic aberration
-* [ ] Luminance mask
-* [ ] Edge fade
-* [ ] "Underwater camera" (might no be fully possible inside Godot)
+* [X] Multiple overlaped caustics textures
+* [X] Chromatic aberration
+* [X] Luminance fade
+* [X] Edge fade
+* [X] "Underwater camera" -> caustics are being shown when camera is inside the caustics volume
 
 ## Showcase
 https://user-images.githubusercontent.com/38077837/168200274-83b08559-283a-4e27-889c-390fd504ba43.mp4

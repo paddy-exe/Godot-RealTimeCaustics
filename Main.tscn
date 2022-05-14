@@ -29,6 +29,7 @@ uniform float caustics_strength = 0.5;
 uniform float caustics_power = 1.0;
 uniform float caustics_fade_radius = 0.8;
 uniform float caustics_fade_strength = 0.5;
+uniform float caustics_luminance_mask_strength = 1.2;
 uniform float chroma_split = 0.1;
 uniform sampler2D luma_gradient : hint_white;
 
@@ -146,11 +147,12 @@ void light(){
 	// Luminance Fade
 	mediump float scene_luma = luminance(screen_color);
 	scene_luma = texture(luma_gradient, vec2(scene_luma)).r;
+	mediump float luminanceMask = mix(1.0, scene_luma, caustics_luminance_mask_strength);
 	
 	// Edge Fade
 	mediump float edgeFadeMask = 1.0 - clamp((distance(positionOS, vec3(0.0)) - caustics_fade_radius) / (1.0 - caustics_fade_strength), 0.0, 1.0);
 	
-	DIFFUSE_LIGHT += c * bbox_mask * scene_luma * edgeFadeMask;
+	DIFFUSE_LIGHT += c * bbox_mask * luminanceMask * edgeFadeMask;
 }"
 
 [sub_resource type="Gradient" id=7]
@@ -158,6 +160,7 @@ offsets = PoolRealArray( 0, 0.10559 )
 
 [sub_resource type="GradientTexture" id=8]
 gradient = SubResource( 7 )
+width = 512
 
 [sub_resource type="ShaderMaterial" id=9]
 shader = SubResource( 6 )
@@ -168,6 +171,7 @@ shader_param/caustics_strength = 0.626
 shader_param/caustics_power = 2.105
 shader_param/caustics_fade_radius = 2.228
 shader_param/caustics_fade_strength = 0.5
+shader_param/caustics_luminance_mask_strength = 1.2
 shader_param/chroma_split = 0.002
 shader_param/caustics_noise = ExtResource( 5 )
 shader_param/luma_gradient = SubResource( 8 )
@@ -220,6 +224,7 @@ material/0 = ExtResource( 2 )
 
 [node name="DirectionalLight" type="DirectionalLight" parent="."]
 transform = Transform( 0.890554, -0.327443, 0.315744, -0.14325, 0.456928, 0.877893, -0.431732, -0.827042, 0.360013, 0, 7.85742, 0 )
+shadow_enabled = true
 
 [node name="Camera" type="Camera" parent="."]
 transform = Transform( 1, 0, 0, 0, 0.949683, 0.313214, 0, -0.313214, 0.949683, 0, 3.05225, 3.76693 )

@@ -6,3 +6,6 @@ export_presets.cfg
 
 # Mono-specific ignores
 .mono/
+
+# Don't upload showcase videos -> upload them in github web editor
+GitHub/
