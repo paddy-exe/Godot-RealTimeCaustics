@@ -1,0 +1,25 @@
+[gd_resource type="ShaderMaterial" load_steps=5 format=2]
+
+[ext_resource path="res://Assets/Shaders/Caustics.gdshader" type="Shader" id=1]
+[ext_resource path="res://Assets/Caustics/caustics-generator2.png" type="Texture" id=2]
+
+[sub_resource type="Gradient" id=7]
+offsets = PoolRealArray( 0, 0.10559 )
+
+[sub_resource type="GradientTexture" id=8]
+gradient = SubResource( 7 )
+width = 512
+
+[resource]
+shader = ExtResource( 1 )
+shader_param/box_size = Vector3( 4, 4, 4 )
+shader_param/caustics_scale = 6.234
+shader_param/caustics_speed = 0.1
+shader_param/caustics_strength = 0.626
+shader_param/caustics_power = 2.105
+shader_param/caustics_fade_radius = 2.228
+shader_param/caustics_fade_strength = 0.5
+shader_param/caustics_luminance_mask_strength = 1.2
+shader_param/chroma_split = 0.002
+shader_param/caustics_noise = ExtResource( 2 )
+shader_param/luma_gradient = SubResource( 8 )
