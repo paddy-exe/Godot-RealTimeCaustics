@@ -16,7 +16,7 @@ size = Vector3( 4, 4, 4 )
 
 [sub_resource type="Shader" id=6]
 code = "shader_type spatial;
-render_mode blend_add, cull_front, depth_test_disable;
+render_mode blend_add, cull_front, depth_test_disable, ambient_light_disabled;
 
 uniform sampler2D caustics_noise;
 
