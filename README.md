@@ -17,7 +17,6 @@ The **original** shader code was written by Alex Ameye ([@alexanderameye](https:
 * [X] Luminance fade
 * [X] Edge fade
 * [X] "Underwater camera" -> caustics are being shown when camera is inside the caustics volume
-* [ ] Box Volume is getting rendered in a semi-transparent color -> should be invisible
 
 ## Showcase
 
