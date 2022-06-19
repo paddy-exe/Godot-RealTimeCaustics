@@ -6,7 +6,7 @@ This is a demo/tutorial showcasing/explaining a way to add cool Caustics effects
 ## Disclaimer
 The **original** shader code was written by Alex Ameye ([@alexanderameye](https://twitter.com/alexanderameye)). The original article can be found here:  [Rendering realtime caustics](https://alexanderameye.github.io/notes/realtime-caustics/). I merely take credit for the porting of his shader to GLSL and Godot.
 
-## Done / To-Do
+## Features
 * [X] Reconstructing world position from depth
 * [X] Bounding Box Mask (caustics only visible inside the box)
 * [X] Caustics Mapping over World UV
