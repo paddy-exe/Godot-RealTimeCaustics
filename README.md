@@ -1,5 +1,5 @@
 # Godot - (RealTime-ish) Caustics
-![](https://img.shields.io/badge/LICENSE-MIT-blue?style=for-the-badge&logo=godotengine)
+[![LICENSE](https://img.shields.io/badge/LICENSE-MIT-blue?style=for-the-badge&logo=godotengine)](https://github.com/paddy-exe/Godot-RealTimeCaustics/blob/3.x/LICENSE.md)
 
 This is a demo showcasing a way to add cool Caustics effects to your Godot project.
 
