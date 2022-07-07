@@ -1,25 +1,15 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://Assets/Materials/DarkTestMaterial.tres" type="Material" id=1]
 [ext_resource path="res://Assets/Materials/RedTestMaterial.tres" type="Material" id=2]
 [ext_resource path="res://Assets/Materials/CausticsMaterial.tres" type="Material" id=3]
 [ext_resource path="res://Assets/Scripts/Main.gd" type="Script" id=4]
+[ext_resource path="res://WorldEnvironment.tres" type="Environment" id=5]
 
 [sub_resource type="SphereMesh" id=1]
 
 [sub_resource type="CubeMesh" id=5]
 size = Vector3( 4, 4, 4 )
-
-[sub_resource type="ProceduralSky" id=3]
-sky_top_color = Color( 0.756863, 0.972549, 1, 1 )
-sky_horizon_color = Color( 0.333333, 0.701961, 1, 1 )
-sky_curve = 0.509117
-ground_bottom_color = Color( 0.188235, 0.188235, 0.188235, 1 )
-sun_latitude = 84.24
-
-[sub_resource type="Environment" id=4]
-background_mode = 2
-background_sky = SubResource( 3 )
 
 [node name="Main" type="Spatial"]
 script = ExtResource( 4 )
@@ -69,4 +59,4 @@ mesh = SubResource( 5 )
 material/0 = ExtResource( 3 )
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource( 4 )
+environment = ExtResource( 5 )
