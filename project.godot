@@ -6,12 +6,13 @@
 ;   [section] ; section goes between []
 ;   param=value ; assign values to parameters
 
-config_version=4
+config_version=5
 
 [application]
 
 config/name="RealTimeCaustics-Godot3"
 run/main_scene="res://Main.tscn"
+config/features=PackedStringArray("4.3")
 config/icon="res://Assets/Icon/project_icon.png"
 config/windows_native_icon="res://Assets/Icon/project_icon_IoI_icon.ico"
 
@@ -21,6 +22,7 @@ common/enable_pause_aware_picking=true
 
 [rendering]
 
+renderer/rendering_method="mobile"
 quality/filters/sharpen_intensity=0.456
 quality/filters/anisotropic_filter_level=16
 quality/filters/use_fxaa=true

@@ -1,60 +1,61 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=3 uid="uid://bpaiplgiv0mfh"]
 
-[ext_resource path="res://Assets/Materials/DarkTestMaterial.tres" type="Material" id=1]
-[ext_resource path="res://Assets/Materials/RedTestMaterial.tres" type="Material" id=2]
-[ext_resource path="res://Assets/Materials/CausticsMaterial.tres" type="Material" id=3]
-[ext_resource path="res://WorldEnvironment.tres" type="Environment" id=5]
+[ext_resource type="Material" path="res://Assets/Materials/DarkTestMaterial.tres" id="1"]
+[ext_resource type="Material" path="res://Assets/Materials/RedTestMaterial.tres" id="2"]
+[ext_resource type="Material" uid="uid://dvpvldyc4slq2" path="res://Assets/Materials/CausticsMaterial.tres" id="3"]
+[ext_resource type="Material" uid="uid://dwi6fgae8ir56" path="res://Assets/Materials/CausticsMaterial_01.tres" id="4_mjdko"]
+[ext_resource type="Environment" uid="uid://u77jyri30wgy" path="res://WorldEnvironment.tres" id="5"]
 
-[sub_resource type="SphereMesh" id=1]
+[sub_resource type="SphereMesh" id="1"]
 
-[sub_resource type="CubeMesh" id=5]
-size = Vector3( 4, 4, 4 )
+[sub_resource type="BoxMesh" id="5"]
+size = Vector3(8, 8, 8)
 
-[node name="Main" type="Spatial"]
+[node name="Main" type="Node3D"]
 
-[node name="TestScene" type="CSGCombiner" parent="."]
+[node name="TestScene" type="CSGCombiner3D" parent="."]
 
-[node name="CSGBox" type="CSGBox" parent="TestScene"]
-width = 8.0
-height = 1.0
-depth = 8.0
-material = ExtResource( 1 )
+[node name="CSGBox3D" type="CSGBox3D" parent="TestScene"]
+size = Vector3(8, 1, 8)
+material = ExtResource("1")
 
-[node name="CSGBox2" type="CSGBox" parent="TestScene"]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 4, -4 )
-width = 8.0
-height = 1.0
-depth = 8.0
-material = ExtResource( 1 )
+[node name="CSGBox2" type="CSGBox3D" parent="TestScene"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 4, -4)
+size = Vector3(8, 1, 8)
+material = ExtResource("1")
 
-[node name="CSGBox3" type="CSGBox" parent="TestScene"]
-transform = Transform( -4.37114e-08, -1, -4.37114e-08, 0, -4.37114e-08, 1, -1, 4.37114e-08, 1.91069e-15, -4, 4, 2.38419e-07 )
-width = 8.0
-height = 1.0
-depth = 8.0
-material = ExtResource( 1 )
+[node name="CSGBox3" type="CSGBox3D" parent="TestScene"]
+transform = Transform3D(-4.37114e-08, -1, -4.37114e-08, 0, -4.37114e-08, 1, -1, 4.37114e-08, 1.91069e-15, -4, 4, 2.38419e-07)
+size = Vector3(8, 1, 8)
+material = ExtResource("1")
 
-[node name="CSGBox" type="CSGBox" parent="TestScene/CSGBox3"]
+[node name="CSGBox3D" type="CSGBox3D" parent="TestScene/CSGBox3"]
 operation = 2
-width = 6.0
-material = ExtResource( 1 )
+size = Vector3(6, 1, 1)
+material = ExtResource("1")
 
-[node name="Sphere" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.049006, 1.61372, 0.0612626 )
-mesh = SubResource( 1 )
-material/0 = ExtResource( 2 )
+[node name="Sphere" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.049006, 1.61372, 0.0612626)
+mesh = SubResource("1")
+surface_material_override/0 = ExtResource("2")
 
-[node name="DirectionalLight" type="DirectionalLight" parent="."]
-transform = Transform( 0.890554, -0.327443, 0.315744, -0.14325, 0.456928, 0.877893, -0.431732, -0.827042, 0.360013, 0, 7.85742, 0 )
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.751947, -0.264598, 0.603791, -0.158536, 0.816449, 0.555228, -0.639877, -0.513224, 0.571977, 0, 7.85742, 0)
 shadow_enabled = true
 
-[node name="Camera" type="Camera" parent="."]
-transform = Transform( 1, 0, 0, 0, 0.949683, 0.313214, 0, -0.313214, 0.949683, 0, 3.05225, 3.76693 )
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.949683, 0.313214, 0, -0.313214, 0.949683, 0, 3.05225, 3.76693)
 
-[node name="CausticVolume" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0453606, 2.01395, -0.0858744 )
-mesh = SubResource( 5 )
-material/0 = ExtResource( 3 )
+[node name="CausticVolume" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.36239, 1.87231, -0.0858744)
+visible = false
+mesh = SubResource("5")
+surface_material_override/0 = ExtResource("3")
+
+[node name="CausticVolume2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.369536, 1.87231, -0.0858744)
+mesh = SubResource("5")
+surface_material_override/0 = ExtResource("4_mjdko")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = ExtResource( 5 )
+environment = ExtResource("5")

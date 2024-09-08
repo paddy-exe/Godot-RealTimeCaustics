@@ -1,43 +1,38 @@
 shader_type spatial;
-render_mode blend_add, cull_front, depth_test_disable, ambient_light_disabled;
+render_mode blend_add, cull_front, depth_test_disabled, ambient_light_disabled;
 
 uniform sampler2D caustics_noise;
 
-uniform vec3 box_size = vec3(1.0);
+uniform vec3 box_size = vec3(4.0);
 
 // Caustics Parameters
-uniform float caustics_scale = 1.0;
+uniform float caustics_scale = 4.0;
 uniform float caustics_speed = 0.1;
-uniform float caustics_strength = 0.5;
-uniform float caustics_power = 1.0;
-uniform float caustics_fade_radius = 0.8;
-uniform float caustics_fade_strength = 0.5;
-uniform float caustics_luminance_mask_strength = 1.2;
-uniform float chroma_split = 0.1;
-uniform sampler2D luma_gradient : hint_white;
+uniform float caustics_strength: hint_range(0.0, 4.0) = 1.0;
+uniform float caustics_power: hint_range(0.25, 8.0) = 2.0;
+uniform float caustics_fade_radius = 2.0;
+uniform float caustics_fade_strength: hint_range(0.0,1.0) = 0.5;
+uniform float caustics_luminance_mask_strength: hint_range(-2.0, 2.0) = 0.2;
+uniform float chroma_split: hint_range(0.0, .02) = 0.002;
+uniform sampler2D luma_gradient : hint_default_white;
 
-varying mat4 vertex_camera;
-varying mat4 vertex_world;
-varying mat4 vertex_projection;
-varying mat4 vertex_modelview;
-void vertex(){
-	vertex_camera = CAMERA_MATRIX;
-	vertex_world = WORLD_MATRIX;
-	vertex_projection = PROJECTION_MATRIX;
-	vertex_modelview = MODELVIEW_MATRIX;
-}
+// Screen Textures
+uniform sampler2D DEPTH_TEXTURE: source_color, hint_depth_texture;
+uniform sampler2D SCREEN_TEXTURE: source_color, hint_screen_texture;
+
+void vertex(){}
 
 float insideBox3D(vec3 v, vec3 bottomLeft, vec3 topRight) {
 	vec3 s = step(bottomLeft, v) - step(topRight, v);
 	return s.x * s.y * s.z; 
 }
 
-float check_encompass_point(vec3 p){
+float check_encompass_point(vec3 p, mat4 model_matrix){
 	// p should be in world space
 	vec3 hs = box_size / 2.0;
 	
-	vec3 bl = -hs + vertex_world[3].xyz;
-	vec3 tr = hs + vertex_world[3].xyz;
+	vec3 bl = -hs + model_matrix[3].xyz;
+	vec3 tr = hs + model_matrix[3].xyz;
 	
 	return insideBox3D(p, bl, tr);
 }
@@ -46,7 +41,7 @@ mediump vec2 panner(mediump vec2 uv, mediump float speed, mediump float tiling){
 	return (vec2(1, 0) * TIME * speed) + (uv * tiling);
 }
 
-mediump vec3 aberration_sample(sampler2D _CausticsTexture, mediump vec2 uv, mediump float split){
+mediump vec3 aberration_sample(sampler2D _CausticsTexture, mediump vec2 uv, float split){
 	mediump vec2 uv1 = uv + vec2(split, split);
 	mediump vec2 uv2 = uv + vec2(split, -split);
 	mediump vec2 uv3 = uv + vec2(-split, -split);
@@ -66,23 +61,29 @@ varying vec3 positionWS;
 varying vec3 positionOS;
 varying vec3 screen_color;
 varying float bbox_mask;
+
 void fragment(){
 	float depth = texture(DEPTH_TEXTURE, SCREEN_UV).x;
-	vec3 ndc = vec3(SCREEN_UV, depth) * 2.0 - 1.0;
+	// Forward+ or Mobile. Uses Vulkan NDC space: [-1,1] for NDC.xy, [0,1] for NDC.z
+	vec3 ndc = vec3(SCREEN_UV * 2.0 - 1.0, depth); 
+	 // Compatibility. Uses OpenGL NDC space: [-1,1] for NDC.xy, [-1,1] for NDC.z
+	if (OUTPUT_IS_SRGB){
+		 ndc = vec3(SCREEN_UV, depth) * 2.0 - 1.0;
+	}
 	vec4 view = INV_PROJECTION_MATRIX * vec4(ndc, 1.0);
 	view.xyz /= view.w;
 	float linear_depth = -view.z;
-	vec4 world = vertex_camera * INV_PROJECTION_MATRIX * vec4(ndc, 1.0);
+	vec4 world = INV_VIEW_MATRIX * INV_PROJECTION_MATRIX * vec4(ndc, 1.0);
 	
 	positionWS = world.xyz / world.w;
-	positionOS = positionWS - WORLD_MATRIX[3].xyz;
-	bbox_mask = check_encompass_point(positionWS);
+	positionOS = positionWS - MODEL_MATRIX[3].xyz;
+	bbox_mask = check_encompass_point(positionWS, MODEL_MATRIX);
 	
 	screen_color = texture(SCREEN_TEXTURE, SCREEN_UV).rgb;
 	
 	// Want to do all the work in the light function
-	// So we use additive blending and set albedo to zero
-	ALBEDO = vec3(0.0);
+	// So we use additive blending and set albedo to 1
+	ALBEDO = vec3(1.0); // This has to be 1 now, not sure why
 }
 
 // Stolen function from StackOverflow ;)
@@ -112,10 +113,15 @@ mat3 makeRotationDir(vec3 direction, vec3 up){
 
 void light(){
 	// Mapping texture
-	vec3 world_light = (vec4(LIGHT, 1.0) * INV_CAMERA_MATRIX).xyz;
+	// Transform LIGHT from view space to world space.
+	vec3 world_light = (INV_VIEW_MATRIX * vec4(LIGHT, 0.0)).xyz;
+	
 	mat3 lrm = makeRotationDir(world_light, vec3(0.0, 1.0, 0.0));
 	mat4 t = mat4(lrm);
-	t[3].xyz = positionWS;
+	
+	// It seems to rotate more correctly if this is commented out.
+	//t[3].xyz = positionWS;
+	
 	mediump vec2 uv = (t * vec4(positionWS, 1.0)).xy;
 	mediump vec2 uv1 = panner(uv, 0.75 * caustics_speed, 1.0 / caustics_scale);
 	mediump vec2 uv2 = panner(uv, caustics_speed, -1.0 / caustics_scale);
