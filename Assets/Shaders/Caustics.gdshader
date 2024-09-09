@@ -1,7 +1,11 @@
 shader_type spatial;
+// Additive blending to mix multiple lights.
+// Front face culling so we can be inside the bounding box.
+// Disable depth testing so the caustics always draw.
+// Disable ambient lighting, so the ambient light does not affect the color twice.
 render_mode blend_add, cull_front, depth_test_disabled, ambient_light_disabled;
 
-uniform sampler2D caustics_noise;
+uniform sampler2D caustics_noise: filter_linear;
 
 uniform vec3 box_size = vec3(4.0);
 
@@ -27,12 +31,12 @@ float insideBox3D(vec3 v, vec3 bottomLeft, vec3 topRight) {
 	return s.x * s.y * s.z; 
 }
 
-float check_encompass_point(vec3 p, mat4 model_matrix){
+float check_encompass_point(vec3 p, mat4 world_matrix){
 	// p should be in world space
 	vec3 hs = box_size / 2.0;
 	
-	vec3 bl = -hs + model_matrix[3].xyz;
-	vec3 tr = hs + model_matrix[3].xyz;
+	vec3 bl = -hs + world_matrix[3].xyz;
+	vec3 tr = hs + world_matrix[3].xyz;
 	
 	return insideBox3D(p, bl, tr);
 }
@@ -64,11 +68,13 @@ varying float bbox_mask;
 
 void fragment(){
 	float depth = texture(DEPTH_TEXTURE, SCREEN_UV).x;
-	// Forward+ or Mobile. Uses Vulkan NDC space: [-1,1] for NDC.xy, [0,1] for NDC.z
-	vec3 ndc = vec3(SCREEN_UV * 2.0 - 1.0, depth); 
-	 // Compatibility. Uses OpenGL NDC space: [-1,1] for NDC.xy, [-1,1] for NDC.z
+	vec3 ndc;
 	if (OUTPUT_IS_SRGB){
+		 // Compatibility. Uses OpenGL NDC space: [-1,1] for NDC.xy, [-1,1] for NDC.z
 		 ndc = vec3(SCREEN_UV, depth) * 2.0 - 1.0;
+	} else {
+		// Forward+ or Mobile. Uses Vulkan NDC space: [-1,1] for NDC.xy, [0,1] for NDC.z
+		ndc = vec3(SCREEN_UV * 2.0 - 1.0, depth); 
 	}
 	vec4 view = INV_PROJECTION_MATRIX * vec4(ndc, 1.0);
 	view.xyz /= view.w;
@@ -81,9 +87,14 @@ void fragment(){
 	
 	screen_color = texture(SCREEN_TEXTURE, SCREEN_UV).rgb;
 	
-	// Want to do all the work in the light function
-	// So we use additive blending and set albedo to 1
-	ALBEDO = vec3(1.0); // This has to be 1 now, not sure why
+	// The caustics are processed in the light() function, so we can support 
+	// multiple lights. Set the albedo to 1.0 and use additive blending.
+	ALBEDO = vec3(1.0);
+	
+	// These are the implicit default values, anyway.
+	METALLIC = 0.0;
+	ROUGHNESS = 1.0;
+	// ALPHA is set in light(), so no need to set it here.
 }
 
 // Stolen function from StackOverflow ;)
@@ -112,34 +123,50 @@ mat3 makeRotationDir(vec3 direction, vec3 up){
 }
 
 void light(){
-	// Mapping texture
-	// Transform LIGHT from view space to world space.
-	vec3 world_light = (INV_VIEW_MATRIX * vec4(LIGHT, 0.0)).xyz;
-	
-	mat3 lrm = makeRotationDir(world_light, vec3(0.0, 1.0, 0.0));
-	mat4 t = mat4(lrm);
-	
-	// It seems to rotate more correctly if this is commented out.
-	//t[3].xyz = positionWS;
-	
-	mediump vec2 uv = (t * vec4(positionWS, 1.0)).xy;
-	mediump vec2 uv1 = panner(uv, 0.75 * caustics_speed, 1.0 / caustics_scale);
-	mediump vec2 uv2 = panner(uv, caustics_speed, -1.0 / caustics_scale);
-	
-	mediump vec3 caus1 = aberration_sample(caustics_noise, uv1, chroma_split);
-	mediump vec3 caus2 = aberration_sample(caustics_noise, uv2, chroma_split);
-	caus1.rgb = pow(caus1.rgb, vec3(caustics_power));
-	caus2.rgb = pow(caus2.rgb, vec3(caustics_power));
-	
-	mediump vec3 c = min(caus1.rgb, caus2.rgb) * caustics_strength;
-	
-	// Luminance Fade
-	mediump float scene_luma = luminance(screen_color);
-	scene_luma = texture(luma_gradient, vec2(scene_luma)).r;
-	mediump float luminanceMask = mix(1.0, scene_luma, caustics_luminance_mask_strength);
-	
-	// Edge Fade
-	mediump float edgeFadeMask = 1.0 - clamp((distance(positionOS, vec3(0.0)) - caustics_fade_radius) / (1.0 - caustics_fade_strength), 0.0, 1.0);
-	
-	DIFFUSE_LIGHT += c * bbox_mask * luminanceMask * edgeFadeMask;
+	if (!LIGHT_IS_DIRECTIONAL) {
+		// Only process directional lights!
+	}
+	else 
+	{
+		// Mapping texture
+		// Transform LIGHT from view space to world space.
+		vec3 world_light = (INV_VIEW_MATRIX * vec4(LIGHT, 0.0)).xyz;
+		
+		mat3 lrm = makeRotationDir(world_light, vec3(0.0, 1.0, 0.0));
+		mat4 t = mat4(lrm);
+		
+		mediump vec2 uv = (t * vec4(positionWS, 1.0)).xy;
+		mediump vec2 uv1 = panner(uv, 0.75 * caustics_speed, 1.0 / caustics_scale);
+		mediump vec2 uv2 = panner(uv, caustics_speed, -1.0 / caustics_scale);
+		
+		mediump vec3 caus1 = aberration_sample(caustics_noise, uv1, chroma_split);
+		mediump vec3 caus2 = aberration_sample(caustics_noise, uv2, chroma_split);
+		caus1.rgb = pow(caus1.rgb, vec3(caustics_power));
+		caus2.rgb = pow(caus2.rgb, vec3(caustics_power));
+		
+		mediump vec3 c = min(caus1.rgb, caus2.rgb) * caustics_strength;
+		
+		// Luminance Fade
+		mediump float scene_luma = luminance(screen_color);
+		scene_luma = texture(luma_gradient, vec2(scene_luma)).r;
+		mediump float luminanceMask = mix(1.0, scene_luma, caustics_luminance_mask_strength);
+		
+		// Edge Fade
+		mediump float edgeFadeMask = 1.0 - clamp((distance(positionOS, vec3(0.0)) - caustics_fade_radius) / (1.0 - caustics_fade_strength), 0.0, 1.0);
+		
+		// Add this light's contribution to the caustics 
+		if (OUTPUT_IS_SRGB) { // Compatibility.
+			DIFFUSE_LIGHT += c * bbox_mask * luminanceMask * edgeFadeMask;
+		} else { // Forward_ and Mobile.
+			DIFFUSE_LIGHT += c * bbox_mask * luminanceMask * edgeFadeMask;
+		}
+		
+		// Hack to avoid a faint outline of the bounding box appearing.
+		// If the total diffuse light is very low, set alpha to 0.0 so nothing renders.
+		if (OUTPUT_IS_SRGB) { // Compatibility.
+			ALPHA = smoothstep(.0005, .001, DIFFUSE_LIGHT.g);
+		} else { // Forward_ and Mobile.
+			ALPHA = smoothstep(.0005, .001, DIFFUSE_LIGHT.g);
+		}
+	}
 }
