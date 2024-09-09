@@ -1,7 +1,7 @@
 [gd_scene load_steps=12 format=3 uid="uid://bpaiplgiv0mfh"]
 
-[ext_resource type="Material" path="res://Assets/Materials/DarkTestMaterial.tres" id="1"]
-[ext_resource type="Material" path="res://Assets/Materials/RedTestMaterial.tres" id="2"]
+[ext_resource type="Material" uid="uid://mljdfxlmhbu5" path="res://Assets/Materials/DarkTestMaterial.tres" id="1"]
+[ext_resource type="Material" uid="uid://cmlbxegtyoqiv" path="res://Assets/Materials/RedTestMaterial.tres" id="2"]
 [ext_resource type="Shader" path="res://Assets/Shaders/Caustics.gdshader" id="3_ba3ji"]
 [ext_resource type="Texture2D" uid="uid://ta5t1ioqn6n2" path="res://Assets/Caustics/caustics-generator.png" id="4_tu4du"]
 [ext_resource type="Texture2D" uid="uid://cy6pg10er0d1b" path="res://Assets/Caustics/luma_gradient.tres" id="5_8ceba"]
