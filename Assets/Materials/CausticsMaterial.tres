@@ -1,25 +1,20 @@
-[gd_resource type="ShaderMaterial" load_steps=5 format=2]
+[gd_resource type="ShaderMaterial" load_steps=4 format=3 uid="uid://dvpvldyc4slq2"]
 
-[ext_resource path="res://Assets/Shaders/Caustics.gdshader" type="Shader" id=1]
-[ext_resource path="res://Assets/Caustics/caustics-generator2.png" type="Texture" id=2]
-
-[sub_resource type="Gradient" id=7]
-offsets = PoolRealArray( 0, 0.10559 )
-
-[sub_resource type="GradientTexture" id=8]
-gradient = SubResource( 7 )
-width = 512
+[ext_resource type="Shader" path="res://Assets/Shaders/Caustics.gdshader" id="1"]
+[ext_resource type="Texture2D" uid="uid://q6bu5git04mh" path="res://Assets/Caustics/caustics-generator2.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://cy6pg10er0d1b" path="res://Assets/Caustics/luma_gradient.tres" id="3_n0un3"]
 
 [resource]
-shader = ExtResource( 1 )
-shader_param/box_size = Vector3( 4, 4, 4 )
-shader_param/caustics_scale = 6.234
-shader_param/caustics_speed = 0.1
-shader_param/caustics_strength = 0.626
-shader_param/caustics_power = 2.105
-shader_param/caustics_fade_radius = 2.228
-shader_param/caustics_fade_strength = 0.5
-shader_param/caustics_luminance_mask_strength = -0.134
-shader_param/chroma_split = 0.002
-shader_param/caustics_noise = ExtResource( 2 )
-shader_param/luma_gradient = SubResource( 8 )
+render_priority = 0
+shader = ExtResource("1")
+shader_parameter/box_size = Vector3(4, 4, 4)
+shader_parameter/caustics_scale = 4.0
+shader_parameter/caustics_speed = 0.1
+shader_parameter/caustics_strength = 1.0
+shader_parameter/caustics_power = 2.0
+shader_parameter/caustics_fade_radius = 1.48
+shader_parameter/caustics_fade_strength = 0.5
+shader_parameter/caustics_luminance_mask_strength = 0.2
+shader_parameter/chroma_split = 0.002
+shader_parameter/caustics_noise = ExtResource("2")
+shader_parameter/luma_gradient = ExtResource("3_n0un3")
