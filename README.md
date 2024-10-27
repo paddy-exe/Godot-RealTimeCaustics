@@ -1,7 +1,8 @@
 # Godot - (RealTime-ish) Caustics
-[![LICENSE](https://img.shields.io/badge/LICENSE-MIT-blue?style=for-the-badge&logo=godotengine)](https://github.com/paddy-exe/Godot-RealTimeCaustics/blob/3.x/LICENSE.md)
+[![LICENSE](https://img.shields.io/badge/LICENSE-MIT-blue?style=for-the-badge&logo=godotengine)](https://github.com/paddy-exe/Godot-RealTimeCaustics/blob/4.3+/LICENSE.md)
 
-This is a demo showcasing a way to add cool Caustics effects to your Godot project.
+This is a demo showcasing a way to add cool Caustics effects to your Godot project. This branch will be only supported for 4.3+ Godot.
+It may work in 4.2 but is not supported.
 
 ## Disclaimer
 The **original** shader code was written by Alex Ameye ([@alexanderameye](https://twitter.com/alexanderameye)). The original article can be found here:  [Rendering realtime caustics](https://alexanderameye.github.io/notes/realtime-caustics/). I merely take credit for the porting of his shader to GLSL and Godot.
@@ -18,8 +19,8 @@ The **original** shader code was written by Alex Ameye ([@alexanderameye](https:
 * [X] "Underwater camera" -> caustics are being shown when camera is inside the caustics volume
 
 ## Showcase
-![image](https://user-images.githubusercontent.com/38077837/177872459-8b2e4d27-ac90-4dab-9d59-d28524acb25d.png)
+![image](Assets/Showcase/Showcase-Picture.jpeg)
 
-https://user-images.githubusercontent.com/38077837/168426592-34ffe32d-2bf4-4785-8a88-3687164ea470.mp4
+![video](Assets/Showcase/Showcase-GIF.gif)
 
 
