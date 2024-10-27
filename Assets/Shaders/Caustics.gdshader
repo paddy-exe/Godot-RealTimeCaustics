@@ -21,8 +21,8 @@ uniform float chroma_split: hint_range(0.0, .02) = 0.002;
 uniform sampler2D luma_gradient : hint_default_white;
 
 // Screen Textures
-uniform sampler2D DEPTH_TEXTURE: source_color, hint_depth_texture;
-uniform sampler2D SCREEN_TEXTURE: source_color, hint_screen_texture;
+uniform sampler2D DEPTH_TEXTURE: hint_depth_texture;
+uniform sampler2D SCREEN_TEXTURE: hint_screen_texture;
 
 void vertex(){}
 
@@ -78,7 +78,6 @@ void fragment(){
 	}
 	vec4 view = INV_PROJECTION_MATRIX * vec4(ndc, 1.0);
 	view.xyz /= view.w;
-	float linear_depth = -view.z;
 	vec4 world = INV_VIEW_MATRIX * INV_PROJECTION_MATRIX * vec4(ndc, 1.0);
 	
 	positionWS = world.xyz / world.w;
